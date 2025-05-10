@@ -12,7 +12,13 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy entrypoint script
+# Install and configure Jupyter
+RUN python -m pip install ipykernel && \
+    python -m ipykernel install --user && \
+    jupyter kernelspec list
+
+# Copy entrypoint scripts
+COPY entrypoint.py .
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
