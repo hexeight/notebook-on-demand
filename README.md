@@ -31,6 +31,7 @@ docker run -e NOTEBOOK="https://example.com/notebook.ipynb" \
 - `NOTEBOOK`: URL of the Jupyter notebook to execute (required)
 - `PARAMETERS`: JSON-encoded parameters to pass to the notebook (optional)
 - `WEBHOOK`: URL to send execution status notifications (optional)
+- `WEBHOOK_SECRET`: Secret token for webhook authentication (optional, but recommended for security)
 
 ### Webhook Payload
 
@@ -43,12 +44,15 @@ The webhook will receive a POST request with the following JSON payload:
 }
 ```
 
+If `WEBHOOK_SECRET` is provided, the request will include an `Authorization: Bearer <secret>` header for authentication.
+
 ## Example
 
 ```bash
-# Run a notebook with parameters
+# Run a notebook with parameters and webhook authentication
 docker run -e NOTEBOOK="https://raw.githubusercontent.com/user/repo/main/analysis.ipynb" \
            -e PARAMETERS='{"input_file": "data.csv", "threshold": 0.5}' \
            -e WEBHOOK="https://api.example.com/notifications" \
+           -e WEBHOOK_SECRET="your-secret-token" \
            notebook-on-demand
 ```

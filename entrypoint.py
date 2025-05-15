@@ -15,9 +15,18 @@ def send_webhook(webhook_url, status, message):
         return
     
     try:
+        # Get webhook secret from environment variable
+        webhook_secret = os.environ.get('WEBHOOK_SECRET')
+        headers = {}
+        
+        # Add Authorization header if secret is provided
+        if webhook_secret:
+            headers['Authorization'] = f'Bearer {webhook_secret}'
+        
         response = requests.post(
             webhook_url,
-            json={"status": status, "message": message}
+            json={"status": status, "message": message},
+            headers=headers
         )
         response.raise_for_status()
         print(f"Webhook sent successfully: {response.json()}")
