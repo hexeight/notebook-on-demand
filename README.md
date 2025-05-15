@@ -8,6 +8,7 @@ A Docker container for running Jupyter notebooks with parameter support and webh
 - Supports parameter injection via JSON
 - Sends execution status to a webhook URL
 - Automatically shuts down after execution
+- Extensible with custom Python dependencies
 
 ## Usage
 
@@ -45,6 +46,50 @@ The webhook will receive a POST request with the following JSON payload:
 ```
 
 If `WEBHOOK_SECRET` is provided, the request will include an `Authorization: Bearer <secret>` header for authentication.
+
+### Adding Custom Dependencies
+
+There are two ways to add your own Python dependencies to the container:
+
+1. **Using a requirements.txt file (Recommended)**:
+   Create a `requirements.txt` file in your project directory and build a custom image:
+
+   ```dockerfile
+   # Dockerfile
+   FROM notebook-on-demand
+   
+   COPY requirements.txt .
+   RUN pip install --no-cache-dir -r requirements.txt
+   ```
+
+   Build and run:
+   ```bash
+   docker build -t my-notebook-runner .
+   docker run -e NOTEBOOK="..." my-notebook-runner
+   ```
+
+2. **Using a setup script**:
+   Create a setup script to install dependencies:
+
+   ```dockerfile
+   # Dockerfile
+   FROM notebook-on-demand
+   
+   COPY setup.sh .
+   RUN chmod +x setup.sh && ./setup.sh
+   ```
+
+   ```bash
+   # setup.sh
+   #!/bin/bash
+   pip install pandas numpy scikit-learn
+   ```
+
+   Build and run:
+   ```bash
+   docker build -t my-notebook-runner .
+   docker run -e NOTEBOOK="..." my-notebook-runner
+   ```
 
 ## Example
 
