@@ -20,6 +20,7 @@ def send_webhook(webhook_url, status, message):
             json={"status": status, "message": message}
         )
         response.raise_for_status()
+        print(f"Webhook sent successfully: {response.json()}")
     except Exception as e:
         print(f"Warning: Failed to send webhook: {str(e)}", file=sys.stderr)
 
