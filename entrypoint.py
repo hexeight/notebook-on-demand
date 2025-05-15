@@ -41,14 +41,26 @@ def format_parameters(parameters_str):
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON parameters: {str(e)}")
 
+def get_python_version():
+    """Get the Python version from environment variable or use default."""
+    return os.environ.get('PYTHON_VERSION', '3.11')
+
 def get_python_kernel():
-    """Get the first available Python kernel."""
+    """Get the Python kernel matching the specified version."""
     try:
         ksm = KernelSpecManager()
         kernels = ksm.get_all_specs()
+        python_version = get_python_version()
+        
+        # Look for exact version match first
+        version_kernels = [k for k, v in kernels.items() if f'python{python_version}' in k.lower()]
+        if version_kernels:
+            return version_kernels[0]
+            
+        # Fallback to any Python kernel if exact match not found
         python_kernels = [k for k, v in kernels.items() if 'python' in k.lower()]
         if not python_kernels:
-            raise ValueError("No Python kernel found")
+            raise ValueError(f"No Python kernel found for version {python_version}")
         return python_kernels[0]
     except Exception as e:
         raise ValueError(f"Error getting kernel: {str(e)}")
@@ -94,6 +106,7 @@ def main():
     notebook_url = os.environ.get('NOTEBOOK')
     parameters_str = os.environ.get('PARAMETERS')
     webhook_url = os.environ.get('WEBHOOK')
+    python_version = get_python_version()
 
     if not notebook_url:
         print("Error: NOTEBOOK environment variable is not set", file=sys.stderr)
@@ -112,7 +125,7 @@ def main():
             download_notebook(notebook_url, notebook_path)
 
             # Get Python kernel
-            print("Checking available kernels...")
+            print(f"Checking available kernels for Python {python_version}...")
             kernel_name = get_python_kernel()
             print(f"Using kernel: {kernel_name}")
 

@@ -9,19 +9,32 @@ A Docker container for running Jupyter notebooks with parameter support and webh
 - Sends execution status to a webhook URL
 - Automatically shuts down after execution
 - Extensible with custom Python dependencies
+- Configurable Python version (3.8, 3.9, 3.10, 3.11, 3.12)
 
 ## Usage
 
 Build the Docker image:
 
 ```bash
+# Build with default Python 3.11
 docker build -t notebook-on-demand .
+
+# Build with specific Python version
+docker build --build-arg PYTHON_VERSION=3.12 -t notebook-on-demand .
 ```
 
 Run the container:
 
 ```bash
+# Run with default Python 3.11
 docker run -e NOTEBOOK="https://example.com/notebook.ipynb" \
+           -e PARAMETERS='{"param1": "value1", "param2": "value2"}' \
+           -e WEBHOOK="https://example.com/webhook" \
+           notebook-on-demand
+
+# Run with specific Python version
+docker run -e NOTEBOOK="https://example.com/notebook.ipynb" \
+           -e PYTHON_VERSION="3.12" \
            -e PARAMETERS='{"param1": "value1", "param2": "value2"}' \
            -e WEBHOOK="https://example.com/webhook" \
            notebook-on-demand
@@ -33,6 +46,9 @@ docker run -e NOTEBOOK="https://example.com/notebook.ipynb" \
 - `PARAMETERS`: JSON-encoded parameters to pass to the notebook (optional)
 - `WEBHOOK`: URL to send execution status notifications (optional)
 - `WEBHOOK_SECRET`: Secret token for webhook authentication (optional, but recommended for security)
+- `PYTHON_VERSION`: Python version to use (optional, defaults to 3.11, supported versions: 3.8, 3.9, 3.10, 3.11, 3.12)
+
+> **Note on Python 3.12**: While Python 3.12 is supported, some scientific and data science packages might not be fully compatible yet. If you encounter package compatibility issues, consider using Python 3.11 or earlier versions.
 
 ### Webhook Payload
 
@@ -64,8 +80,9 @@ There are two ways to add your own Python dependencies to the container:
 
    Build and run:
    ```bash
-   docker build -t my-notebook-runner .
-   docker run -e NOTEBOOK="..." my-notebook-runner
+   # Build with specific Python version
+   docker build --build-arg PYTHON_VERSION=3.12 -t my-notebook-runner .
+   docker run -e NOTEBOOK="..." -e PYTHON_VERSION="3.12" my-notebook-runner
    ```
 
 2. **Using a setup script**:
@@ -87,16 +104,18 @@ There are two ways to add your own Python dependencies to the container:
 
    Build and run:
    ```bash
-   docker build -t my-notebook-runner .
-   docker run -e NOTEBOOK="..." my-notebook-runner
+   # Build with specific Python version
+   docker build --build-arg PYTHON_VERSION=3.12 -t my-notebook-runner .
+   docker run -e NOTEBOOK="..." -e PYTHON_VERSION="3.12" my-notebook-runner
    ```
 
 ## Example
 
 ```bash
-# Run a notebook with parameters and webhook authentication
+# Run a notebook with parameters, webhook authentication, and specific Python version
 docker run -e NOTEBOOK="https://raw.githubusercontent.com/user/repo/main/analysis.ipynb" \
-           -e PARAMETERS='{"input_file": "data.csv", "threshold": 0.5}' \
+           -e PYTHON_VERSION="3.12" \
+           -e PARAMETERS='{"input_file": "https://raw.githubusercontent.com/user/repo/main/data.csv", "threshold": 0.5}' \
            -e WEBHOOK="https://api.example.com/notifications" \
            -e WEBHOOK_SECRET="your-secret-token" \
            notebook-on-demand
