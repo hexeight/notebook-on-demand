@@ -8,9 +8,32 @@ import subprocess
 import requests
 from pathlib import Path
 from jupyter_client.kernelspec import KernelSpecManager
+import nbformat
 
-def send_webhook(webhook_url, status, message):
-    """Send webhook notification with execution status."""
+def get_last_cell_output(notebook_path):
+    """Extract the output from the last cell of the notebook."""
+    try:
+        with open(notebook_path, 'r', encoding='utf-8') as f:
+            nb = nbformat.read(f, as_version=4)
+        
+        # Get the last cell that has output
+        for cell in reversed(nb.cells):
+            if cell.cell_type == 'code' and cell.outputs:
+                # Convert outputs to string representation
+                output_text = []
+                for output in cell.outputs:
+                    if 'text' in output:
+                        output_text.append(output['text'])
+                    elif 'data' in output and 'text/plain' in output['data']:
+                        output_text.append(output['data']['text/plain'])
+                return '\n'.join(output_text)
+        return None
+    except Exception as e:
+        print(f"Warning: Failed to extract notebook output: {str(e)}", file=sys.stderr)
+        return None
+
+def send_webhook(webhook_url, status, message, output=None):
+    """Send webhook notification with execution status and notebook output."""
     if not webhook_url:
         return
     
@@ -23,9 +46,16 @@ def send_webhook(webhook_url, status, message):
         if webhook_secret:
             headers['Authorization'] = f'Bearer {webhook_secret}'
         
+        payload = {
+            "status": status,
+            "message": message
+        }
+        if output is not None:
+            payload["output"] = output
+        
         response = requests.post(
             webhook_url,
-            json={"status": status, "message": message},
+            json=payload,
             headers=headers
         )
         response.raise_for_status()
@@ -142,8 +172,11 @@ def main():
             # Execute notebook
             execute_notebook(notebook_path, output_path, formatted_params, kernel_name)
             
+            # Get the output from the last cell
+            last_cell_output = get_last_cell_output(output_path)
+            
             print("Notebook execution completed successfully")
-            send_webhook(webhook_url, "success", "Notebook execution completed successfully")
+            send_webhook(webhook_url, "success", "Notebook execution completed successfully", last_cell_output)
 
     except Exception as e:
         error_msg = str(e)
