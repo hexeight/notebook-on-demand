@@ -27,6 +27,7 @@ def get_last_cell_output(notebook_path):
                     elif 'data' in output and 'text/plain' in output['data']:
                         output_text.append(output['data']['text/plain'])
                 return '\n'.join(output_text)
+        print(f"Warning: No output found in notebook: {notebook_path}", file=sys.stderr)
         return None
     except Exception as e:
         print(f"Warning: Failed to extract notebook output: {str(e)}", file=sys.stderr)
@@ -175,7 +176,8 @@ def main():
             # Get the output from the last cell
             last_cell_output = get_last_cell_output(output_path)
             
-            print("Notebook execution completed successfully")
+            print("Notebook execution completed successfully with output:")
+            print(last_cell_output)
             send_webhook(webhook_url, "success", "Notebook execution completed successfully", last_cell_output)
 
     except Exception as e:
