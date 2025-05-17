@@ -1,11 +1,12 @@
-FROM --platform=$BUILDPLATFORM python:3.12-slim AS python312
-FROM --platform=$BUILDPLATFORM python:3.11-slim AS python311
-FROM --platform=$BUILDPLATFORM python:3.10-slim AS python310
-FROM --platform=$BUILDPLATFORM python:3.9-slim AS python39
-FROM --platform=$BUILDPLATFORM python:3.8-slim AS python38
-
 # Set default Python version
 ARG PYTHON_VERSION=3.11
+
+FROM --platform=$BUILDPLATFORM python:3.12-slim AS python3.12
+FROM --platform=$BUILDPLATFORM python:3.11-slim AS python3.11
+FROM --platform=$BUILDPLATFORM python:3.10-slim AS python3.10
+FROM --platform=$BUILDPLATFORM python:3.9-slim AS python3.9
+FROM --platform=$BUILDPLATFORM python:3.8-slim AS python3.8
+
 FROM python${PYTHON_VERSION} AS final
 
 # Install system dependencies
