@@ -113,10 +113,9 @@ There are two ways to add your own Python dependencies to the container:
 
 ```bash
 # Run a notebook with parameters, webhook authentication, and specific Python version
-docker run -e NOTEBOOK="https://raw.githubusercontent.com/user/repo/main/analysis.ipynb" \
-           -e PYTHON_VERSION="3.12" \
-           -e PARAMETERS='{"input_file": "https://raw.githubusercontent.com/user/repo/main/data.csv", "threshold": 0.5}' \
+docker run -e NOTEBOOK="https://raw.githubusercontent.com/hexeight/notebook-on-demand/refs/heads/main/test/hello.ipynb" \
+           -e PARAMETERS='{"name": "Eddie"}' \
            -e WEBHOOK="https://api.example.com/notifications" \
            -e WEBHOOK_SECRET="your-secret-token" \
-           notebook-on-demand
+           notebook-on-demand:latest
 ```
